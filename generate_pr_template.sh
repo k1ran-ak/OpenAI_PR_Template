@@ -77,18 +77,32 @@ read -p "Are there any considerations for this PR? (y/n): " has_considerations
 
 if [[ $has_considerations == "y" ]]; then
     read -p "Does this PR require any major changes in the consumer? (y/n): " major_changes
-    read -p "Does this PR require migration? (y/n): " requires_migration
+    if [[ $major_changes == "y" ]]; then
+        major_changes="Yes"
+    else
+        major_changes="N/A"
+    fi
 
+    read -p "Does this PR require migration? (y/n): " requires_migration
     if [[ $requires_migration == "y" ]]; then
+        requires_migration="Yes"
         read -p "What type of migration is required (RESYNC / FORCELOGOUT)? " migration_type
         read -p "Why is this migration required? " migration_reason
     else
+        requires_migration="N/A"
         migration_type="N/A"
         migration_reason="N/A"
     fi
 
     read -p "Are there any specific fallbacks (revert / feature flag / other)? " fallbacks
+    if [[ -z $fallbacks ]]; then
+        fallbacks="N/A"
+    fi
+
     read -p "Are there any inter-project dependencies? " dependencies
+    if [[ -z $dependencies ]]; then
+        dependencies="N/A"
+    fi
 else
     major_changes="N/A"
     requires_migration="N/A"
