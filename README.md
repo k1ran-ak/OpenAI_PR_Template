@@ -71,6 +71,71 @@ if [ -z "$description" ] || [ "$description" == "null" ]; then
   exit 1
 fi
 
+# Ask if there are considerations
+read -p "Are there any considerations for this PR? (y/n): " has_considerations
+
+if [[ $has_considerations == "y" ]]; then
+    read -p "Does this PR require any major changes in the consumer? (y/n): " major_changes
+    read -p "Does this PR require migration? (y/n): " requires_migration
+
+    if [[ $requires_migration == "y" ]]; then
+        read -p "What type of migration is required (RESYNC / FORCELOGOUT)? " migration_type
+        read -p "Why is this migration required? " migration_reason
+    else
+        migration_type="N/A"
+        migration_reason="N/A"
+    fi
+
+    read -p "Are there any specific fallbacks (revert / feature flag / other)? " fallbacks
+    read -p "Are there any inter-project dependencies? " dependencies
+else
+    major_changes="N/A"
+    requires_migration="N/A"
+    migration_type="N/A"
+    migration_reason="N/A"
+    fallbacks="N/A"
+    dependencies="N/A"
+fi
+
+# Interactive checklist
+questions=(
+    "New and updated code is logically covered with unit tests and does not violate other product requirements"
+    "New and updated code do not trigger linter warnings or errors"
+    "Changes are made according to Organization Style guide and other Coding Standards"
+    "Required documentation is added and/or updated"
+    "New and updated strings are using localized keys (are not hardcoded)"
+    "New extension/helper/code is not duplicated"
+    "Required Sentry Logs (or) Breadcrumbs are added"
+    "Did I remove all unnecessary logging and print statements"
+    "Thread-Safety is considered when utilizing Shared resources"
+    "The code has been thoroughly reviewed for potential security vulnerabilities"
+    "Sensitive information is not exposed in code or configuration"
+)
+
+echo "Checklist:"
+for item in "${questions[@]}"; do
+    echo "- [ ] $item"
+done
+
+read -p "Do you want to mark all checklist items as 'yes' by default? (y/n): " default_apply
+
+answers=($(for _ in "${questions[@]}"; do echo "no"; done))
+
+if [[ $default_apply == "y" ]]; then
+    for i in "${!answers[@]}"; do
+        answers[$i]="yes"
+    done
+else
+    for ((i = 0; i < ${#questions[@]}; i++)); do
+        read -p "Mark '${questions[i]}' as completed? (y/n): " answer
+        if [[ $answer == "y" ]]; then
+            answers[$i]="yes"
+        else
+            answers[$i]="no"
+        fi
+    done
+fi
+
 # Create PR template
 cat > PR_TEMPLATE.md <<EOL
 # Description
@@ -88,26 +153,22 @@ $description
 # How to Test
 <!--Add testing steps needed to verify changes-->
 
-# Considerations (if any)
-- Does it require any major changes in the consumer
-- Do we need Migration. If so:
-    - Type of Migration (RESYNC / FORCELOGOUT)
-    - Why this migration is required?
-- Is there any specific fallback from those changes (revert / feature flag / other)
-- Are there any inter-project dependencies
+### Considerations (if any)
+- Does it require any major changes in the consumer: ${major_changes}
+- Does it require Migration: ${requires_migration}
+    - Type of Migration: ${migration_type}
+    - Why this migration is required: ${migration_reason}
+- Specific fallback (if any): ${fallbacks}
+- Inter-project dependencies: ${dependencies}
 
-# Checklist
-- [X] New and updated code is logically covered with unit tests and does not violate other product requirements
-- [X] New and updated code do not trigger linter warnings or errors (Rules)
-- [X] Changes are made according to Organization Style guide and other Coding Standards ([link](https://github.com/Adaptavant/Anywhere-IOS-Container/blob/main/Documentation/Code%20Standard.md#ios-code-standard))
-- [X] Required documentation is added and/or updated (Inline or README)
-- [X] New and updated strings are using localized keys (are not hardcoded)
-- [X] New extension/helper/code is not duplicated
-- [X] Required Sentry Logs (or) Breadcrumbs are added
-- [X] Did I remove all unnecessary logging and print statements
-- [X] Thread-Safety is considered when utilizing Shared resources
-- [X] The code has been thoroughly reviewed for potential security vulnerabilities
-- [X] Sensitive information is not exposed in code or configuration
+### Checklist
+$(for ((i = 0; i < ${#questions[@]}; i++)); do
+    if [[ ${answers[i]} == "yes" ]]; then
+        echo "[X] ${questions[i]}"
+    else
+        echo "[ ] ${questions[i]}"
+    fi
+done)
 EOL
 
 cat PR_TEMPLATE.md | pbcopy
