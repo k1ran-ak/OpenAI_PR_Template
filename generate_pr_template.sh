@@ -164,9 +164,9 @@ $description
 ### Checklist
 $(for ((i = 0; i < ${#questions[@]}; i++)); do
     if [[ ${answers[i]} == "yes" ]]; then
-        echo "[X] ${questions[i]}"
+        echo "- [X] ${questions[i]}"
     else
-        echo "[ ] ${questions[i]}"
+        echo "- [ ] ${questions[i]}"
     fi
 done)
 EOL
