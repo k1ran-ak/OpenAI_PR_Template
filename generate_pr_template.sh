@@ -23,6 +23,7 @@ if [ -z "$current_branch" ]; then
 fi
 
 # Set the default target branch (change 'main' if your default branch differs)
+# for develop: orgin/develop, for release: orgin/release
 target_branch="main"
 
 # Extract JIRA issue ID (part before the first '/')
