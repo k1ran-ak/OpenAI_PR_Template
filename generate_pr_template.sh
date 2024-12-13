@@ -73,33 +73,78 @@ if [ -z "$description" ] || [ "$description" == "null" ]; then
 fi
 
 # Ask if there are considerations
-read -p "Are there any considerations for this PR? (y/n): " has_considerations
+echo "Are there any considerations for this PR? (y/n): "
+read -n 1 has_considerations
+echo # Move to a new line after input
 
 if [[ $has_considerations == "y" ]]; then
-    read -p "Does this PR require any major changes in the consumer? (y/n): " major_changes
+    echo "Does this PR require any major changes in the consumer? (y/n):"
+    read -n 1 major_changes
+    echo # Move to a new line after input
     if [[ $major_changes == "y" ]]; then
         major_changes="Yes"
     else
         major_changes="N/A"
     fi
 
-    read -p "Does this PR require migration? (y/n): " requires_migration
+    echo "Does this PR require migration? (y/n):"
+    read -n 1 requires_migration
+    echo # Move to a new line after input
     if [[ $requires_migration == "y" ]]; then
         requires_migration="Yes"
-        read -p "What type of migration is required (RESYNC / FORCELOGOUT)? " migration_type
-        read -p "Why is this migration required? " migration_reason
+    echo "What type of migration is required?"
+    echo "1) RESYNC"
+    echo "2) FORCELOGOUT"
+    echo "3) Other"
+    echo "Enter your choice (1/2/3):"
+    read -n 1 migration_type
+    echo # Move to a new line after input
+    case $migration_type in
+        1)
+            migration_type="RESYNC"
+            ;;
+        2)
+            migration_type="FORCELOGOUT"
+            ;;
+        3)
+            read -p "Specify the migration type: " migration_type
+            ;;
+        *)
+            migration_type="N/A"
+            echo "Invalid choice. Marking as N/A."
+            ;;
+    esac
     else
         requires_migration="N/A"
         migration_type="N/A"
         migration_reason="N/A"
     fi
 
-    read -p "Are there any specific fallbacks (revert / feature flag / other)? " fallbacks
-    if [[ -z $fallbacks ]]; then
-        fallbacks="N/A"
-    fi
+    echo "Are there any specific fallbacks? Select an option:"
+    echo "1) Revert"
+    echo "2) Feature Flag"
+    echo "3) Other"
+    echo "Enter your choice (1/2/3):"
+    read -n 1 fallback_choice
+    echo # Move to a new line after input
+    case $fallback_choice in
+        1)
+            fallbacks="Revert"
+            ;;
+        2)
+            fallbacks="Feature Flag"
+            ;;
+        3)
+            read -p "Specify the fallback type: " fallbacks
+            ;;
+        *)
+            fallbacks="N/A"
+            echo "Invalid choice. Marking as N/A."
+            ;;
+    esac
 
-    read -p "Are there any inter-project dependencies? " dependencies
+    echo "Are there any inter-project dependencies? If yes then please specify"
+    read dependencies
     if [[ -z $dependencies ]]; then
         dependencies="N/A"
     fi
@@ -111,6 +156,7 @@ else
     fallbacks="N/A"
     dependencies="N/A"
 fi
+
 
 # Interactive checklist
 questions=(
@@ -132,7 +178,9 @@ for item in "${questions[@]}"; do
     echo "- [ ] $item"
 done
 
-read -p "Do you want to mark all checklist items as 'yes' by default? (y/n): " default_apply
+echo "Do you want to mark all checklist items as 'yes' by default? (y/n): "
+read -n 1 default_apply
+echo # Move to a new line after input
 
 answers=($(for _ in "${questions[@]}"; do echo "no"; done))
 
@@ -142,13 +190,16 @@ if [[ $default_apply == "y" ]]; then
     done
 else
     for ((i = 0; i < ${#questions[@]}; i++)); do
-        read -p "Mark '${questions[i]}' as completed? (y/n): " answer
-        if [[ $answer == "y" ]]; then
-            answers[$i]="yes"
-        else
-            answers[$i]="no"
-        fi
-    done
+    echo "Mark '${questions[i]}' as completed? (y/n):"
+    read -n 1 answer # Read a single character input without pressing Enter
+    echo # Move to a new line after input
+    if [[ $answer == "y" ]]; then
+        answers[$i]="- [X] ${questions[i]}"
+    else
+        answers[$i]="- [ ] ${questions[i]}"
+    fi
+done
+
 fi
 
 # Create PR template
