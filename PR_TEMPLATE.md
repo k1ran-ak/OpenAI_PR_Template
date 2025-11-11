@@ -26,24 +26,14 @@ Merging into: `main`
 - Inter-project dependencies: N/A
 
 ### Checklist
-[X] New and updated code is logically covered with unit tests and does not violate other product requirements
-
-[X] New and updated code do not trigger linter warnings or errors
-
-[X] Changes are made according to Organization Style guide and other Coding Standards
-
-[X] Required documentation is added and/or updated
-
-[X] New and updated strings are using localized keys (are not hardcoded)
-
-[X] New extension/helper/code is not duplicated
-
-[X] Required Sentry Logs (or) Breadcrumbs are added
-
-[X] Did I remove all unnecessary logging and print statements
-
-[X] Thread-Safety is considered when utilizing Shared resources
-
-[X] The code has been thoroughly reviewed for potential security vulnerabilities
-
-[X] Sensitive information is not exposed in code or configuration
+- [X] New and updated code is logically covered with unit tests and does not violate other product requirements
+- [X] New and updated code do not trigger linter warnings or errors
+- [X] Changes are made according to Organization Style guide and other Coding Standards
+- [X] Required documentation is added and/or updated
+- [X] New and updated strings are using localized keys (are not hardcoded)
+- [X] New extension/helper/code is not duplicated
+- [X] Required Sentry Logs (or) Breadcrumbs are added
+- [X] Did I remove all unnecessary logging and print statements
+- [X] Thread-Safety is considered when utilizing Shared resources
+- [X] The code has been thoroughly reviewed for potential security vulnerabilities
+- [X] Sensitive information is not exposed in code or configuration
